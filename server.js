@@ -3,12 +3,23 @@ require('dotenv').config();
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
-
+const helmet = require('helmet');
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
 
 const app = express();
+// app.use(helmet.contentSecurityPolicy({
+//   directives:{
+//   defaultSrc: ["'self'"], // Erlaubt nur das Laden von Ressourcen aus der gleichen Quelle
+//   frameAncestors: ["'self'"],  // Erlaubt nur iFrame-Einbindungen von der eigenen Domain
+//   scriptSrc: ["'self'"],  // Erlaubt nur Skripte aus der gleichen Quelle
+//   imgSrc: ["'self'", "https://cdn.freecodecamp.org"]
+// }}));
+app.use(helmet.frameguard({ action: 'sameorigin' })); // Only allow your site to be loaded in an iFrame on your own pages.
+app.use(helmet.dnsPrefetchControl({ allow: false })); // Blockiert DNS Prefetching vollständig, um Ressourcenverschwendung und potenzielle Datenlecks zu vermeiden.
+app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // Der Referrer wird nur gesendet, wenn der Nutzer innerhalb der gleichen Domain navigiert.
+// Alternativ könntest du auch no-referrer verwenden, falls du den Referrer-Header vollständig blockieren möchtest.
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
